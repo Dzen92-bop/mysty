@@ -1,0 +1,19 @@
+{
+  "Payments": [
+    {
+      "Code": "pm4",
+      "Currency": "USD",
+      "Count": 92.1
+    },
+    {
+      "Code": "pm5",
+      "Currency": "EUR",
+      "Count": 94.1
+    },
+    {
+      "Code": "pm6",
+      "Currency": "RUB",
+      "Count": 2
+    }
+  ]
+}

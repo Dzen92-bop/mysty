@@ -1,19 +1,7 @@
 ﻿using System;
-
-public class Tutorial
-{
-    public string Code { get;set;}
-    public int Step { get; set; }
-    public Tutorial(string code, int step)
-    {
-        Code = code;
-        Step = step;
-    }
-    public virtual void InfoT()
-    {
-        Console.WriteLine($"Name: {Code}, Step: {Step}");
-    }
-}
+using System.Text.Json.Serialization;
+using System.IO;
+using System.Text.Json;
 
 public class Payment
 {
@@ -26,76 +14,55 @@ public class Payment
         Currency = currency;
         Count = count;
     }
-    public virtual void InfoP()
-    {
-        Console.WriteLine($"Name: {Code}, Currency: {Currency}, Count: {Count}");
-    }
 }
 
 public class VirtualPayment
 {
-    public string Code { get; set; }
-    public bool Valid { get; set; }
-
-    private List<Payment> payments = new List<Payment>();
-    public VirtualPayment(string code, bool valid)
-    {
-        Code = code;
-        Valid = valid;
-    }
-    public void AddPayment(Payment payment)
-    {
-        payments.Add(payment);
-        Console.WriteLine($"Валюта добавлена");
-    }
-    public virtual void InfoVP()
-    {
-        Console.WriteLine($"Name: {Code}, Valid: {Valid}");
-    }
-
-    public void DisplayAllPayments()
-    {
-        if (payments.Count == 0)
-        {
-            Console.WriteLine("-----");
-            return;
-        }
-
-        Console.WriteLine("Список:");
-        foreach (Payment payment in payments)
-        {
-            Console.WriteLine(payment);
-        }
-    }
+    public List<Payment> Payments { get; set; } = new List<Payment>();
 }
-
-public class Cheater
-{
-    public string Code { get; set; }
-    public bool Banned { get; set; }
-    public Cheater(string code, bool banned)
-    {
-        Code = code;
-        Banned = banned;
-    }
-    public virtual void InfoC()
-    {
-        Console.WriteLine($"Name: {Code}, Banned: {Banned}");
-    }
-}
-
 public class Program
 {
     public static void Main(string[] args)
     {
-        Tutorial tutu = new Tutorial("tr1", 1);
-        VirtualPayment vPayment = new VirtualPayment("vp", true);
-        vPayment.AddPayment(new Payment("pm1", "USD", 91.1));
-        vPayment.AddPayment(new Payment("pm2", "EUR", 96.1));
-        vPayment.AddPayment(new Payment("pm3", "RUB", 1));
-        Cheater cheater = new Cheater("ct1", true);
-        tutu.InfoT();
-        cheater.InfoC();
-        vPayment.DisplayAllPayments();
+        
+        VirtualPayment vPayment = new VirtualPayment();
+        vPayment.Payments.Add(new Payment("pm1", "USD", 91.1 ));
+        vPayment.Payments.Add(new Payment("pm2", "EUR", 96.1));
+        vPayment.Payments.Add(new Payment("pm3", "RUB", 1));
+
+        string filePath = "vpayment.json";
+        string fileLoadPath = "inbase.json";
+
+        SaveToFile(vPayment, filePath);
+
+        VirtualPayment loadedvPayment = LoadFromFile(fileLoadPath);
+        foreach (var member in loadedvPayment.Payments)
+        {
+            switch (member)
+            {
+                case Payment payment:
+                    Console.WriteLine($"{payment.Code}, {payment.Currency}, {payment.Count}");
+                    break;
+            }
+        }
+        static void SaveToFile(VirtualPayment pra, string filePath)
+        {
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                Converters =
+            {
+                new JsonStringEnumConverter()
+            }
+            };
+            string json = JsonSerializer.Serialize(pra, options);
+            File.WriteAllText(filePath, json);
+        }
+
+        static VirtualPayment LoadFromFile(string fileLoadPath)
+        {
+            string json = File.ReadAllText(fileLoadPath);
+            return JsonSerializer.Deserialize<VirtualPayment>(json);
+        }
     }
 }
